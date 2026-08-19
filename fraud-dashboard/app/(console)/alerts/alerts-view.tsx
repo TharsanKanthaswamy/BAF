@@ -2,16 +2,18 @@
 
 import * as React from "react";
 
-import { applyFilters, sortNewestFirst } from "@/lib/analytics";
+import { applyFilters, sortNewestFirst, sourceCounts } from "@/lib/analytics";
 import { formatCompactCurrency, formatInteger } from "@/lib/format";
 import { normalizeRisk, RISK_SEVERITY_DESC, RISK_STYLES } from "@/lib/risk";
 import type { RiskLevel, TransactionRecord } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { EngineStatus } from "@/components/console/engine-status";
 import { PageHeader, PageSections } from "@/components/console/page-header";
 import { useConsoleData } from "@/components/console/use-console-data";
 import { FilterBar } from "@/components/dashboard/filter-bar";
 import { Panel, PanelBleed, PanelHeader } from "@/components/dashboard/panel";
+import { SelectionBar } from "@/components/dashboard/selection-bar";
 import { TransactionDetail } from "@/components/dashboard/transaction-detail";
 import { TransactionTable } from "@/components/dashboard/transaction-table";
 
@@ -25,16 +27,45 @@ import { TransactionTable } from "@/components/dashboard/transaction-table";
  * ago no matter what the clock says.
  */
 export function AlertsView() {
-  const { rows, channels, filters, setFilters, now, awaiting, stale } =
+  const { rows, channels, filters, setFilters, now, awaiting, stale, deleteRows } =
     useConsoleData();
 
   const [selected, setSelected] = React.useState<TransactionRecord | null>(null);
+  const [ticked, setTicked] = React.useState<Set<string>>(() => new Set());
 
   const alerts = React.useMemo(() => {
     // The verdict is not the analyst's to choose here — this page is the flagged
     // set by definition. Everything else in the shared filter still applies.
     return sortNewestFirst(applyFilters(rows, { ...filters, verdict: "FLAGGED" }));
   }, [rows, filters]);
+
+  const condemned = React.useMemo(
+    () => alerts.filter((row) => ticked.has(row.transaction_id)),
+    [alerts, ticked]
+  );
+  const breakdown = React.useMemo(() => sourceCounts(condemned), [condemned]);
+
+  const remove = async () => {
+    const ids = condemned.map((row) => row.transaction_id);
+    try {
+      const result = await deleteRows(ids);
+      setTicked(new Set());
+      if (selected && ids.includes(selected.transaction_id)) setSelected(null);
+      toast.success(
+        `Resolved & deleted ${formatInteger(result.deleted)} alert${result.deleted === 1 ? "" : "s"}`,
+        {
+          description: `${formatInteger(result.remaining)} row${result.remaining === 1 ? "" : "s"} left in the buffer.`,
+        }
+      );
+    } catch (error) {
+      toast.error("Delete failed", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "The engine did not confirm the deletion. Nothing was removed.",
+      });
+    }
+  };
 
   const byTier = React.useMemo(() => {
     const counts = new Map<RiskLevel, { count: number; exposure: number }>();
@@ -72,8 +103,6 @@ export function AlertsView() {
       />
 
       <div className={cn("space-y-4", (awaiting || stale) && "is-restating")}>
-        {/* One strip, four tiers, hairline-separated: the shape of the workload
-            before any single case is opened. */}
         <div className="overflow-hidden rounded-2xl bg-border ring-1 ring-border">
           <div className="grid gap-px sm:grid-cols-2 xl:grid-cols-4">
             {RISK_SEVERITY_DESC.map((level) => {
@@ -84,10 +113,6 @@ export function AlertsView() {
               return (
                 <div
                   key={level}
-                  // Same padding and same ambient hover as the other two 4-up
-                  // strips in the console, which are built from `StatTile`. This
-                  // one cannot be: its figure is a two-part caption rather than a
-                  // hero number, so it is hand-built and has to match by hand.
                   className={cn(
                     "flex min-w-0 items-center gap-2.5 bg-card px-4 py-3.5",
                     "transition-colors duration-200 ease-[var(--ease-out-quint)]",
@@ -98,27 +123,18 @@ export function AlertsView() {
                     aria-hidden
                     className="h-7 w-[3px] shrink-0 rounded-full"
                     style={{
-                      background: count > 0 ? style.colorVar : "var(--swatch-off)",
+                      background: count === 0 ? "var(--swatch-off)" : style.colorVar,
                     }}
                   />
-                  <span className="min-w-0">
-                    <span className="flex items-center gap-1.5">
-                      <style.Icon
-                        aria-hidden
-                        className={cn(
-                          "size-3.5 shrink-0",
-                          count > 0 ? style.fg : "opacity-50"
-                        )}
-                      />
-                      <span className="truncate text-callout font-medium">
-                        {style.label}
-                      </span>
-                    </span>
-                    <span className="figures-tabular block text-subheadline text-muted-foreground">
-                      {formatInteger(count)} open ·{" "}
-                      {formatCompactCurrency(entry?.exposure ?? 0)}
-                    </span>
-                  </span>
+                  <div className="min-w-0">
+                    <p className="flex items-baseline gap-1.5 font-semibold leading-none">
+                      <span className="figures-tabular text-title-2">{formatInteger(count)}</span>
+                      <span className="text-subheadline text-muted-foreground">{style.label}</span>
+                    </p>
+                    <p className="figures-tabular mt-1 truncate text-callout text-muted-foreground">
+                      {entry?.exposure ? formatCompactCurrency(entry.exposure) : "—"}
+                    </p>
+                  </div>
                 </div>
               );
             })}
@@ -141,15 +157,28 @@ export function AlertsView() {
               now={now}
               onInspect={setSelected}
               selectedId={selected?.transaction_id ?? null}
-              // Severity first. The rows arrive newest-first and the sort is
-              // stable, so recency survives as the tiebreak inside each tier.
+              selection={{ selected: ticked, onChange: setTicked }}
               initialSort={{ key: "risk", dir: "desc" }}
             />
           </PanelBleed>
         </Panel>
       </div>
 
-      <TransactionDetail transaction={selected} onClose={() => setSelected(null)} />
+      <SelectionBar
+        count={condemned.length}
+        breakdown={breakdown}
+        onClear={() => setTicked(new Set())}
+        onDelete={remove}
+      />
+
+      <TransactionDetail
+        transaction={selected}
+        onClose={() => setSelected(null)}
+        onDelete={async (id) => {
+          await deleteRows([id]);
+          setSelected(null);
+        }}
+      />
     </PageSections>
   );
 }

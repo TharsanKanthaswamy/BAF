@@ -126,7 +126,14 @@ export function TransactionsView() {
         onDelete={remove}
       />
 
-      <TransactionDetail transaction={selected} onClose={() => setSelected(null)} />
+      <TransactionDetail
+        transaction={selected}
+        onClose={() => setSelected(null)}
+        onDelete={async (id) => {
+          await deleteRows([id]);
+          setSelected(null);
+        }}
+      />
     </PageSections>
   );
 }

@@ -61,6 +61,7 @@ export function OverviewView() {
     awaiting,
     stale,
     isConnected,
+    deleteRows,
   } = useConsoleData();
 
   const [selected, setSelected] = React.useState<TransactionRecord | null>(null);
@@ -200,7 +201,14 @@ export function OverviewView() {
         </div>
       </div>
 
-      <TransactionDetail transaction={selected} onClose={() => setSelected(null)} />
+      <TransactionDetail
+        transaction={selected}
+        onClose={() => setSelected(null)}
+        onDelete={async (id) => {
+          await deleteRows([id]);
+          setSelected(null);
+        }}
+      />
     </PageSections>
   );
 }

@@ -265,7 +265,9 @@ export function ConsoleProvider({ children }: { children: React.ReactNode }) {
   );
 
   const resetEngine = React.useCallback(async () => {
+    setRows([]);
     await clearHistory();
+    needsHydrate.current = true;
     await load("hydrate");
   }, [load]);
 
@@ -279,11 +281,9 @@ export function ConsoleProvider({ children }: { children: React.ReactNode }) {
    */
   const deleteRows = React.useCallback(
     async (transactionIds: string[]): Promise<DeleteResult> => {
-      const result = await deleteTransactions({ transactionIds });
       const removed = new Set(transactionIds);
       setRows((previous) => previous.filter((row) => !removed.has(row.transaction_id)));
-      // The buffer just shrank, so the next poll must be a full window: a tail
-      // would only re-learn the head and leave the freed capacity unfilled.
+      const result = await deleteTransactions({ transactionIds });
       needsHydrate.current = true;
       await load("hydrate");
       return result;
@@ -293,11 +293,11 @@ export function ConsoleProvider({ children }: { children: React.ReactNode }) {
 
   const deleteBySource = React.useCallback(
     async (sources: TransactionSource[]): Promise<DeleteResult> => {
-      const result = await deleteTransactions({ sources });
       const dropped = new Set<string>(sources);
       setRows((previous) =>
         previous.filter((row) => !dropped.has(row.source ?? "unknown"))
       );
+      const result = await deleteTransactions({ sources });
       needsHydrate.current = true;
       await load("hydrate");
       return result;

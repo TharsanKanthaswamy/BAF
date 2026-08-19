@@ -11,6 +11,7 @@ import {
   Landmark,
   Sparkles,
   Timer,
+  Trash2,
   Waypoints,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -129,41 +130,39 @@ function Detail({
   Icon?: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="min-w-0 space-y-0.5">
-      <dt className="flex items-center gap-1.5 text-subheadline text-[var(--ink-muted)]">
-        {Icon ? <Icon className="size-3 shrink-0" /> : null}
+    <div className="flex items-baseline justify-between gap-3 border-b border-border/50 py-2 last:border-b-0">
+      <dt className="flex items-center gap-1.5 text-callout text-muted-foreground">
+        {Icon ? <Icon className="size-3.5" /> : null}
         {label}
       </dt>
-      <dd className="figures-tabular truncate text-body font-medium">
-        {value}
-      </dd>
+      <dd className="figures-tabular text-right text-body font-medium">{value}</dd>
     </div>
   );
 }
 
 /**
- * Replaces the hand-rolled overlay this dashboard used to ship: Base UI supplies
- * the focus trap, the escape handler, the scroll lock and the return-focus
- * behaviour, none of which the previous `fixed inset-0` div had.
+ * Triage inspection drawer.
+ *
+ * Explains *why* the models reached their verdict, not just that they did.
+ * Every panel names the signal, its baseline, and whether it crossed the
+ * threshold — because an analyst who cannot see the threshold cannot defend
+ * the decision to a supervisor.
  */
 export function TransactionDetail({
   transaction,
   onClose,
+  onDelete,
 }: {
   transaction: TransactionRecord | null;
   onClose: () => void;
+  onDelete?: (transactionId: string) => Promise<void>;
 }) {
-  // The popup must stay mounted while it animates out, so the last selected
-  // record is held after `transaction` goes null. Unmounting on close would
-  // snap the dialog away instead of letting it scale back down.
+  // Retain the last non-null transaction across the close animation so the
+  // content does not flash out while the sheet is sliding away.
   const [cached, setCached] = React.useState<TransactionRecord | null>(transaction);
-
-  // Adjusted during render, not in an effect: React re-runs this component
-  // immediately with the new value before touching the DOM, so the dialog never
-  // paints one frame holding the previous record.
-  if (transaction !== null && transaction !== cached) {
-    setCached(transaction);
-  }
+  React.useEffect(() => {
+    if (transaction) setCached(transaction);
+  }, [transaction]);
 
   return (
     <Dialog
@@ -172,12 +171,18 @@ export function TransactionDetail({
         if (!open) onClose();
       }}
     >
-      {cached ? <DetailContent transaction={cached} /> : null}
+      {cached ? <DetailContent transaction={cached} onDelete={onDelete} /> : null}
     </Dialog>
   );
 }
 
-function DetailContent({ transaction }: { transaction: TransactionRecord }) {
+function DetailContent({
+  transaction,
+  onDelete,
+}: {
+  transaction: TransactionRecord;
+  onDelete?: (transactionId: string) => Promise<void>;
+}) {
   const level = normalizeRisk(transaction.risk_level);
   const style = RISK_STYLES[level];
   const signals = triageSignals(transaction);
@@ -375,6 +380,22 @@ function DetailContent({ transaction }: { transaction: TransactionRecord }) {
           <Copy data-icon="inline-start" />
           Copy reference
         </Button>
+        {onDelete ? (
+          <Button
+            variant="outline"
+            size="lg"
+            className="text-destructive hover:bg-destructive/10"
+            onClick={async () => {
+              await onDelete(transaction.transaction_id);
+              toast.success("Transaction deleted", {
+                description: transaction.transaction_id,
+              });
+            }}
+          >
+            <Trash2 data-icon="inline-start" />
+            Delete
+          </Button>
+        ) : null}
         <Button variant="destructive" size="lg" onClick={escalate}>
           <Ban data-icon="inline-start" />
           Escalate to review

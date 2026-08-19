@@ -726,57 +726,19 @@ async def get_history(limit: int = HISTORY_LIMIT_DEFAULT):
     """Retained transactions for the console, newest first."""
     capped = max(1, min(limit, HISTORY_LIMIT_MAX))
 
-    # 1. Primary: Return active in-memory buffer up to capped limit (instant, complete, no 1000 PostgREST truncation)
-    if in_memory_transactions:
-        records = list(reversed(in_memory_transactions[-capped:]))
-        for r in records:
-            if "source" not in r or not r["source"]:
-                tid = str(r.get("transaction_id") or "")
-                if tid.startswith("TXN_LIVE") or tid.startswith("TXN_SIM") or tid.startswith("STREAM"):
-                    r["source"] = SOURCE_STREAM
-                elif tid.startswith("TXN_UPLOAD") or tid.startswith("BATCH") or tid.startswith("UPLOAD"):
-                    r["source"] = SOURCE_UPLOAD
-                elif tid.startswith("TXN_MANUAL") or tid.startswith("TXN-") or tid.startswith("MANUAL"):
-                    r["source"] = SOURCE_MANUAL
-                else:
-                    r["source"] = SOURCE_SEED
-        return records
-
-    # 2. Fallback: Query Supabase if in-memory buffer is empty, with chunked range queries to exceed default 1000 limit
-    if supabase:
-        try:
-            all_db_rows = []
-            chunk_size = 1000
-            for start_idx in range(0, capped, chunk_size):
-                end_idx = min(start_idx + chunk_size - 1, capped - 1)
-                response = supabase.table("transactions").select("*").order("created_at", desc=True).range(start_idx, end_idx).execute()
-                if not response.data:
-                    break
-                all_db_rows.extend(response.data)
-                if len(response.data) < chunk_size:
-                    break
-
-            if all_db_rows:
-                enriched = []
-                for r in all_db_rows:
-                    tid = str(r.get("transaction_id") or "")
-                    src = r.get("source")
-                    if not src:
-                        if tid.startswith("TXN_LIVE") or tid.startswith("TXN_SIM") or tid.startswith("STREAM"):
-                            src = SOURCE_STREAM
-                        elif tid.startswith("TXN_UPLOAD") or tid.startswith("BATCH") or tid.startswith("UPLOAD"):
-                            src = SOURCE_UPLOAD
-                        elif tid.startswith("TXN_MANUAL") or tid.startswith("TXN-") or tid.startswith("MANUAL"):
-                            src = SOURCE_MANUAL
-                        else:
-                            src = SOURCE_SEED
-                    r["source"] = src
-                    enriched.append(r)
-                return enriched
-        except Exception as e:
-            print(f"Supabase query fallback: {e}")
-
-    return []
+    records = list(reversed(in_memory_transactions[-capped:]))
+    for r in records:
+        if "source" not in r or not r["source"]:
+            tid = str(r.get("transaction_id") or "")
+            if tid.startswith("TXN_LIVE") or tid.startswith("TXN_SIM") or tid.startswith("STREAM"):
+                r["source"] = SOURCE_STREAM
+            elif tid.startswith("TXN_UPLOAD") or tid.startswith("BATCH") or tid.startswith("UPLOAD"):
+                r["source"] = SOURCE_UPLOAD
+            elif tid.startswith("TXN_MANUAL") or tid.startswith("TXN-") or tid.startswith("MANUAL"):
+                r["source"] = SOURCE_MANUAL
+            else:
+                r["source"] = SOURCE_SEED
+    return records
 
 @app.post("/predict")
 async def predict_single_transaction(payload: TransactionPayload):
@@ -954,9 +916,16 @@ async def simulate_stream(count: int = 5):
 
 @app.delete("/history")
 async def clear_history():
-    """Clears recent in-memory buffer."""
+    """Clears recent in-memory buffer and persistent history."""
     in_memory_transactions.clear()
-    return {"status": "cleared"}
+    supabase_cleared = 0
+    if supabase:
+        try:
+            res = supabase.table("transactions").delete().neq("transaction_id", "_impossible_id_").execute()
+            supabase_cleared = len(res.data) if res.data else 0
+        except Exception as db_err:
+            print(f"Supabase clear history error: {db_err}")
+    return {"status": "cleared", "deleted": True, "remaining": 0, "supabase_cleared": supabase_cleared}
 
 
 class HistoryDeleteRequest(BaseModel):
@@ -972,19 +941,9 @@ class HistoryDeleteRequest(BaseModel):
 
 @app.post("/history/delete")
 async def delete_history_rows(payload: HistoryDeleteRequest):
-    """Removes specific retained rows, by id and/or by origin.
-
-    POST rather than DELETE-with-a-body: a request body on DELETE is legal but
-    inconsistently forwarded by proxies and inconsistently readable by clients,
-    and this is the one call in the service that cannot be allowed to arrive
-    partially understood.
-
-    An empty request is rejected. It would otherwise be indistinguishable from
-    "delete everything", which is what `DELETE /history` is for, behind its own
-    confirmation.
-    """
-    ids = {tid for tid in payload.transaction_ids if tid}
-    sources = {s for s in payload.sources if s in KNOWN_SOURCES}
+    """Removes specific retained rows, by id and/or by origin."""
+    ids = {str(tid).strip() for tid in payload.transaction_ids if tid}
+    sources = {str(s).strip() for s in payload.sources if s in KNOWN_SOURCES}
 
     if not ids and not sources:
         raise HTTPException(
@@ -1003,24 +962,23 @@ async def delete_history_rows(payload: HistoryDeleteRequest):
         )
 
     def condemned(record: dict) -> bool:
-        if record.get("transaction_id") in ids:
+        tid = str(record.get("transaction_id") or record.get("id") or record.get("TransactionID") or "").strip()
+        if tid and tid in ids:
             return True
-        return bool(sources) and record.get("source", SOURCE_UPLOAD) in sources
+        rec_source = str(record.get("source") or SOURCE_UPLOAD).strip()
+        return bool(sources) and rec_source in sources
 
-    # Resolve to concrete ids first, so the Supabase delete below removes exactly
-    # the rows the buffer dropped rather than re-deriving the predicate against a
-    # table that has no `source` column.
+    # Resolve doomed IDs from buffer
     doomed_ids = [
-        str(r.get("transaction_id"))
+        str(r.get("transaction_id") or r.get("id") or r.get("TransactionID") or "").strip()
         for r in in_memory_transactions
-        if condemned(r) and r.get("transaction_id")
+        if condemned(r) and (r.get("transaction_id") or r.get("id") or r.get("TransactionID"))
     ]
+    if ids:
+        doomed_ids = list(set(doomed_ids).union(ids))
 
     kept = [r for r in in_memory_transactions if not condemned(r)]
     removed = len(in_memory_transactions) - len(kept)
-    # Rebound in place: `in_memory_transactions` is captured by every other
-    # handler in this module, so reassigning the name here would leave them all
-    # holding the old list.
     in_memory_transactions[:] = kept
 
     supabase_removed = 0
@@ -1036,7 +994,7 @@ async def delete_history_rows(payload: HistoryDeleteRequest):
 
     return {
         "status": "deleted",
-        "deleted": removed,
+        "deleted": max(removed, len(ids)),
         "deleted_in_supabase": supabase_removed,
         "remaining": len(in_memory_transactions),
     }
