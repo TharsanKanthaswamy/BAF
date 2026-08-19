@@ -1,0 +1,1002 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Apple's own stack, and only Apple's own stack.
+
+     This is the chain apple.com itself serves, in its order: San Francisco by
+     every name it answers to, then Apple's historic fallbacks — Helvetica Neue,
+     Helvetica, Arial. No substitute family is spliced in, because every
+     candidate would be a face Apple does not use. `-apple-system` performs the
+     Text/Display optical crossover itself on Apple hardware.
+
+     Nothing here is downloaded. San Francisco is licensed for Apple-platform UI
+     only, so the correct way to ask for it is by name. */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "SF Pro Icons",
+    "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* Above the 20px optical crossover. Named separately so a machine with the
+     standalone SF Pro Display family installed uses it for display type. */
+  --font-heading:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro",
+    "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* SF Mono, then the two monospaces Apple has shipped with macOS for years. */
+  --font-mono:
+    ui-monospace, "SF Mono", SFMono-Regular, Menlo, Monaco, monospace;
+
+  /* ------------------------------------------------------------------
+     THE TYPE SCALE — one ladder, ten rungs, no値 off-ladder.
+
+     Apple's text styles at macOS sizes (13px body, not the iOS 17px),
+     because this is a dense operator console. Each step carries its
+     size, leading and tracking together, so a size can never be used
+     with the wrong letterspacing.
+
+     The two `--text-stat*` rungs are the addition: headline figures
+     want to be genuinely large and genuinely heavy, which is the one
+     place this interface raises its voice. Everything else stays quiet
+     so that when a number gets big, it means something.
+     ------------------------------------------------------------------ */
+
+  /* Hero figure — the single largest thing on any page. */
+  --text-stat-lg: 2.75rem; /* 44 */
+  --text-stat-lg--line-height: 1;
+  --text-stat-lg--letter-spacing: -0.03em;
+  --text-stat-lg--font-weight: 700;
+
+  /* Headline figure in a card. The KPI strip and every tier count use this. */
+  --text-stat: 2rem; /* 32 */
+  --text-stat--line-height: 1;
+  --text-stat--letter-spacing: -0.024em;
+  --text-stat--font-weight: 700;
+
+  /* iOS Large Title, 34/41 — the one borrowing from the iOS scale rather than
+     the macOS one. It exists for the page heading. */
+  --text-page-title: 2.125rem; /* 34 */
+  --text-page-title--line-height: 2.5rem; /* 40 */
+  --text-page-title--letter-spacing: -0.026em;
+  --text-page-title--font-weight: 700;
+
+  --text-large-title: 1.625rem; /* 26 */
+  --text-large-title--line-height: 2rem; /* 32 */
+  --text-large-title--letter-spacing: -0.022em;
+  --text-large-title--font-weight: 700;
+
+  --text-title-1: 1.375rem; /* 22 */
+  --text-title-1--line-height: 1.6875rem; /* 27 */
+  --text-title-1--letter-spacing: -0.019em;
+
+  --text-title-2: 1.0625rem; /* 17 */
+  --text-title-2--line-height: 1.375rem; /* 22 */
+  --text-title-2--letter-spacing: -0.015em;
+
+  --text-title-3: 0.9375rem; /* 15 */
+  --text-title-3--line-height: 1.25rem; /* 20 */
+  --text-title-3--letter-spacing: -0.012em;
+
+  /* Apple's Headline is Semibold Body — the weight is part of the style. */
+  --text-headline: 0.8125rem; /* 13 */
+  --text-headline--line-height: 1.0625rem; /* 17 */
+  --text-headline--letter-spacing: -0.008em;
+  --text-headline--font-weight: 600;
+
+  --text-body: 0.8125rem; /* 13 */
+  --text-body--line-height: 1.1875rem; /* 19 */
+  --text-body--letter-spacing: -0.008em;
+
+  --text-callout: 0.75rem; /* 12 */
+  --text-callout--line-height: 1rem; /* 16 */
+  --text-callout--letter-spacing: -0.005em;
+
+  --text-subheadline: 0.6875rem; /* 11 */
+  --text-subheadline--line-height: 0.875rem; /* 14 */
+  --text-subheadline--letter-spacing: 0;
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  /* The lifted card surface, one step above `--card`. Hover, and nothing else. */
+  --color-card-hover: var(--card-hover);
+
+  /* ------------------------------------------------------------------
+     THE TWO SURFACES AND TWO EDGES BELOW A CARD.
+
+     A block nested inside a card — a meter, a ledger, a stat inset, an
+     empty-state well — is one step recessed from the card it sits in. That
+     step used to be spelled `bg-muted/40` in one file, `/50` in the next
+     and `/60` in a third, which resolve to three colours within one
+     percent of each other: invisible individually, and collectively the
+     exact "assembled by nobody in particular" texture this palette exists
+     to avoid. It is one token now.
+
+       bg-inset             a block nested inside a card
+       hover:bg-inset-hover that block, or a row, under the cursor
+       border-border        every hairline: dividers, seams, static rings
+       ring-input           the resting edge of a control
+       ring-input-hover     that edge under the cursor
+       bg-track             the unfilled part of a meter or progress track
+       bg-swatch-off        a tier swatch whose tier has no rows in view
+       bg-scrim             the veil behind a dialog or a sheet
+     ------------------------------------------------------------------ */
+  --color-inset: var(--inset);
+  --color-inset-hover: var(--inset-hover);
+  --color-input-hover: var(--input-hover);
+  --color-track: var(--track);
+  --color-swatch-off: var(--swatch-off);
+  --color-scrim: var(--scrim);
+
+  /* Risk — four reserved colours, used for risk and for absolutely nothing else. */
+  --color-sev-low: var(--severity-low);
+  --color-sev-medium: var(--severity-medium);
+  --color-sev-high: var(--severity-high);
+  --color-sev-critical: var(--severity-critical);
+
+  /* The single accent. Non-semantic: brand, liveness, selection, focus, and the
+     primary data line. It deliberately does NOT mean "good" — risk owns all the
+     semantics, so green and red never have to be told apart. */
+  --color-accent-brand: var(--brand);
+
+  /* Chart chrome */
+  --color-grid: var(--gridline);
+  --color-axis: var(--axis);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-rail: var(--rail);
+
+  /* ------------------------------------------------------------------
+     THE RADIUS SCALE — one ladder, one documented rule.
+
+       4px  (sm)   inline marks inside a table cell
+       6px  (md)   small chips and tags
+       8px  (lg)   CONTROLS — every button, input, select, nav link
+      10px  (xl)   inner blocks nested inside a card
+      14px  (2xl)  CARDS — every panel, tile and card surface
+      20px  (3xl)  overlays — dialogs and sheets
+      full        PILLS — risk badges, the connection pill, avatars
+
+     Mixed radii are legal only with a rule that is followed everywhere.
+     This is the rule: controls 8, inner blocks 10, cards 14, overlays 20,
+     badges full. A card's inner block is 4px tighter than its container,
+     which is what keeps nested corners looking concentric rather than
+     accidentally parallel.
+     ------------------------------------------------------------------ */
+  --radius-sm: 0.25rem; /* 4 */
+  --radius-md: 0.375rem; /* 6 */
+  --radius-lg: 0.5rem; /* 8 — control */
+  --radius-xl: 0.625rem; /* 10 — inner block */
+  --radius-2xl: 0.875rem; /* 14 — card */
+  --radius-3xl: 1.25rem; /* 20 — overlay */
+  --radius-4xl: 1.75rem; /* 28 — the mobile sheet's top corners */
+
+  /* ------------------------------------------------------------------
+     THE SPACING SCALE — the four gaps this application is allowed to have.
+
+     Anything laying out a card, a grid of cards, or a page references
+     one of these rather than picking a number. Two similar elements with
+     different padding is the single most legible "assembled by nobody in
+     particular" tell, and this is the fix for it.
+     ------------------------------------------------------------------ */
+  --spacing-card: 1.25rem; /* 20 — padding inside every card */
+  --spacing-card-sm: 1rem; /* 16 — padding inside a dense card or cell row */
+  --spacing-grid: 1rem; /* 16 — gap between cards in a grid */
+  --spacing-section: 1.5rem; /* 24 — gap between a page's sections */
+
+  /* Motion — one vocabulary for the whole app. */
+  --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-quint: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/*
+ * ── Palette ───────────────────────────────────────────────────────────────────
+ * Spotify's discipline, applied to a fraud desk.
+ *
+ * What that discipline actually is, stripped of the branding: a near-black ground
+ * with every surface inside a narrow band above it, text carried entirely by ink
+ * weight on a *pure neutral* grey ramp, and exactly one saturated colour on the
+ * whole page. Nothing is tinted, nothing gradients, and green appears only where
+ * a person is meant to act.
+ *
+ * Three chromatic families exist, and only three:
+ *
+ *   1. `--brand` — #1DB954 in dark, its dark-enough twin #12813f in light.
+ *      Non-semantic: liveness, selection, focus ring, primary button, primary
+ *      data line. Never means "good"; nothing is graded green, so a protanope is
+ *      never asked to separate green from red.
+ *   2. `--severity-*` — four reserved risk colours on a heat ramp: red, orange,
+ *      amber, neutral grey. Used for risk and for nothing else in the interface.
+ *      LOW gets no chroma at all, because "no signal" should look like no signal.
+ *   3. `--destructive` — aliased to `--severity-critical` on purpose. A
+ *      destructive action and a critical alert occupy the same register, and one
+ *      danger red is more honest than two nearly-identical ones.
+ *
+ * Contrast, measured (WCAG 2.1 against the surface each token is drawn on):
+ *
+ *   dark   on #121212 ground / #181818 card
+ *          #1DB954  7.28:1 · #b3b3b3  9.07:1 · #8f8f8f  5.88:1
+ *          risk #ff5252 5.63:1 · #ff9838 8.77:1 · #ffd23f 12.4:1 · #8f8f8f 5.52:1
+ *   light  on #ffffff card
+ *          #12813f  4.96:1 · #5e5e5e  6.49:1 · #6f6f6f  5.03:1
+ *          risk #c8102e 5.7:1 · #b45309 5.02:1 · #8a6100 5.51:1 · #6b6b6b 5.4:1
+ *
+ * Every risk mark ships an icon and a written label alongside the colour, so the
+ * warm ramp collapsing under protanopia costs a reader nothing. The four steps
+ * are also monotone in lightness, so in greyscale they still read as a ramp.
+ */
+:root {
+  color-scheme: light;
+
+  /* Planes. Light mode is the same architecture inverted: a faintly grey ground
+     so that white cards have something to sit on. A white card on a white page
+     is not a card, which is why this used to be flat. */
+  --background: #f6f6f6;
+  --foreground: #121212;
+  --card: #ffffff;
+  --card-hover: #fafafa;
+  --card-foreground: #121212;
+  --popover: #ffffff;
+  --popover-foreground: #121212;
+  --rail: #ffffff;
+
+  --primary: #121212;
+  --primary-foreground: #ffffff;
+  --secondary: #ececec;
+  --secondary-foreground: #121212;
+  --muted: #f0f0f0;
+  --muted-foreground: #5e5e5e;
+  --accent: #e6e6e6;
+  --accent-foreground: #121212;
+
+  --border: rgb(18 18 18 / 0.09);
+  --input: rgb(18 18 18 / 0.14);
+  --input-hover: rgb(18 18 18 / 0.22);
+  --ring: #12813f;
+
+  /* One step recessed from `--card`, and its hover. Literal colours rather than
+     a translucent grey, so an inset block reads the same whether it sits on a
+     card, on a hovered card, or on the page ground. */
+  --inset: #f4f4f4;
+  --inset-hover: #ededed;
+
+  /* Two washes of the ink itself, for marks that have to read as "the absence of
+     a value" rather than as a colour of their own: the unfilled part of a meter
+     track, and a tier swatch whose tier has no rows in the current slice.
+
+     Derived from `--foreground` rather than given literal values, so one
+     declaration covers both themes: `var(--foreground)` is substituted against
+     the element that *uses* the token, and the theme class lands on <html> —
+     the same element these are declared on — so dark mode resolves the wash
+     against #ededed instead of #121212 and the mark lightens instead of
+     darkening. Both were written out longhand at four call sites in three files
+     before this, which is two identical 50-character expressions each. */
+  --track: color-mix(in oklab, var(--foreground) 8%, transparent);
+  --swatch-off: color-mix(in oklab, var(--foreground) 12%, transparent);
+
+  /* The veil behind a dialog or a sheet. Written out identically in `dialog.tsx`
+     and `sheet.tsx` before this — the same 50-character expression twice, which
+     is a token that had not been named yet.
+
+     This one gets a literal per theme rather than being derived from
+     `--foreground` like the two above, because the two themes need opposite
+     directions. Ink at 24% is right on the light ground. On the dark ground the
+     popup (#242424) is *lighter* than the page (#121212), so a white veil would
+     raise the page toward the popup and flatten the separation the overlay
+     exists to create; black at 55% pushes the page away from it instead. */
+  --scrim: rgb(18 18 18 / 0.24);
+
+  /* The accent. One value, one job. */
+  --brand: #12813f;
+  --brand-contrast: #ffffff;
+  --brand-wash: rgb(18 129 63 / 0.1);
+
+  /* Risk: four reserved steps. Darkened for a white surface without leaving the
+     hue each one owns. */
+  --severity-critical: #c8102e;
+  --severity-high: #b45309;
+  --severity-medium: #8a6100;
+  --severity-low: #6b6b6b;
+
+  /* One danger red for the whole application. `-contrast` is the ink that sits
+     on top of it, and it flips by mode for a measured reason: white on #c8102e
+     is 5.87:1, but white on the lighter dark-mode #ff5252 is only 3.18:1 while
+     near-black on it is 6.61:1. A solid destructive button is legible in both
+     modes only if the label follows the fill. */
+  --destructive: #c8102e;
+  --destructive-contrast: #ffffff;
+
+  /* Chart series. Slot 1 is the accent; every later slot is a neutral ink step,
+     because a second *hue* on this page would be decoration. A chart needing
+     more than three series becomes small multiples instead. */
+  --chart-1: #12813f;
+  --chart-2: #4a4a4a;
+  --chart-3: #8a8a8a;
+  --chart-4: #b5b5b5;
+  --chart-5: #d6d6d6;
+
+  /* Chart chrome & ink. */
+  --ink-secondary: #3d3d3d;
+  --ink-muted: #6f6f6f;
+  --gridline: #ebebeb;
+  --axis: #d4d4d4;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #121212;
+  --sidebar-primary: #121212;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ececec;
+  --sidebar-accent-foreground: #121212;
+  --sidebar-border: rgb(18 18 18 / 0.09);
+  --sidebar-ring: #12813f;
+
+  /* Elevation — layered hairline + diffuse shadow, never a hard drop. Kept
+     deliberately shallow: on a flat monochrome ground a heavy shadow is the
+     loudest thing on screen. */
+  --shadow-tile: 0 1px 2px rgb(18 18 18 / 0.04);
+  --shadow-raised: 0 1px 2px rgb(18 18 18 / 0.04), 0 6px 20px -10px rgb(18 18 18 / 0.1);
+  --shadow-overlay: 0 12px 32px -8px rgb(18 18 18 / 0.14), 0 2px 8px rgb(18 18 18 / 0.05);
+
+  /* ── Glass ──────────────────────────────────────────────────────────────────
+     Scoped to the two surfaces that genuinely have content moving behind them:
+     the sticky console bar and the mobile nav sheet. Glass over a static field
+     of its own colour is just paint. */
+  --glass-tint: rgb(255 255 255 / 0.76);
+  --glass-tint-strong: rgb(255 255 255 / 0.9);
+  --glass-blur: 24px;
+  --glass-saturate: 120%;
+  --glass-specular: rgb(255 255 255 / 0.7);
+  --glass-hairline: rgb(18 18 18 / 0.09);
+  --glass-shadow: 0 1px 1px rgb(18 18 18 / 0.03), 0 8px 24px -12px rgb(18 18 18 / 0.1);
+
+  /* The sliding thumb of a segmented control. */
+  --control-thumb: #ffffff;
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* Spotify's own two values, used for the two things they are for: #121212 is
+     the ground, #181818 is a card on it. Every surface stays inside a 10% band,
+     which is the whole reason that interface reads calm at this density. */
+  --background: #121212;
+  --foreground: #ffffff;
+  --card: #181818;
+  --card-hover: #1f1f1f;
+  --card-foreground: #ffffff;
+  --popover: #242424;
+  --popover-foreground: #ffffff;
+  /* The rail sits *below* the ground, the way Spotify's does. Off-black rather
+     than #000 — pure black next to #121212 reads as a hole, not a plane. */
+  --rail: #0a0a0a;
+
+  --primary: #ffffff;
+  --primary-foreground: #121212;
+  --secondary: #1f1f1f;
+  --secondary-foreground: #ffffff;
+  --muted: #1f1f1f;
+  --muted-foreground: #b3b3b3;
+  --accent: #2a2a2a;
+  --accent-foreground: #ffffff;
+
+  --border: rgb(255 255 255 / 0.1);
+  --input: rgb(255 255 255 / 0.14);
+  --input-hover: rgb(255 255 255 / 0.24);
+  --ring: #1db954;
+
+  /* #282828 is Spotify's own hover grey; #202020 is the step between the #181818
+     card and it. Both stay inside the 10% band the whole palette lives in. */
+  --inset: #202020;
+  --inset-hover: #282828;
+
+  /* Down, not up — see the note on `--scrim` in `:root`. */
+  --scrim: rgb(0 0 0 / 0.55);
+
+  --brand: #1db954;
+  --brand-contrast: #0a0a0a;
+  --brand-wash: rgb(29 185 84 / 0.14);
+
+  /* The same four steps, re-graded for a dark ground: risk now ascends in
+     brightness as it descends in severity, because on a dark surface the palest
+     mark is the loudest one and CRITICAL must not be the quietest thing on the
+     page. Hue does the ordering; lightness keeps it legible in greyscale. */
+  --severity-critical: #ff5252;
+  --severity-high: #ff9838;
+  --severity-medium: #ffd23f;
+  --severity-low: #8f8f8f;
+
+  --destructive: #ff5252;
+  --destructive-contrast: #0a0a0a;
+
+  --chart-1: #1db954;
+  --chart-2: #d4d4d4;
+  --chart-3: #8f8f8f;
+  --chart-4: #5c5c5c;
+  --chart-5: #3a3a3a;
+
+  --ink-secondary: #d4d4d4;
+  --ink-muted: #8f8f8f;
+  --gridline: #2a2a2a;
+  --axis: #3a3a3a;
+
+  --sidebar: #0a0a0a;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #121212;
+  --sidebar-accent: #232323;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgb(255 255 255 / 0.1);
+  --sidebar-ring: #1db954;
+
+  --shadow-tile: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4), 0 6px 20px -10px rgb(0 0 0 / 0.6);
+  --shadow-overlay: 0 12px 32px -8px rgb(0 0 0 / 0.7), 0 2px 8px rgb(0 0 0 / 0.4);
+
+  /* Dark glass is a *lifted* grey, not black — a pane catching light off the
+     content behind it reads brighter than the void, never darker. */
+  --glass-tint: rgb(30 30 30 / 0.76);
+  --glass-tint-strong: rgb(30 30 30 / 0.92);
+  --glass-saturate: 115%;
+  --glass-specular: rgb(255 255 255 / 0.08);
+  --glass-hairline: rgb(255 255 255 / 0.1);
+  --glass-shadow: 0 1px 1px rgb(0 0 0 / 0.5), 0 8px 24px -12px rgb(0 0 0 / 0.7);
+
+  --control-thumb: #3a3a3a;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+    /* SF Pro ships as a variable font with an optical-size axis, which is how
+       San Francisco's Text→Display crossover is expressed in one family. Left on
+       so the axis is honoured wherever SF Pro is actually resolving. */
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply text-body bg-background text-foreground;
+  }
+
+  /* Unstyled headings land on the scale by default. Above the 20px crossover the
+     display stack applies; at 17 and 15 Apple stays on the Text cut, so h3/h4
+     keep the body family and only change size and weight. */
+  h1 {
+    @apply font-heading text-large-title;
+  }
+
+  h2 {
+    @apply font-heading text-title-1 font-semibold;
+  }
+
+  h3 {
+    @apply text-title-2 font-semibold;
+  }
+
+  h4 {
+    @apply text-title-3 font-semibold;
+  }
+
+  /* The category label. Small, heavy, tracked open, and quiet in colour — the
+     counterweight to the big figure it sits above. Capitals at 11px close up
+     without the extra space, which is why this is the one style on the ladder
+     with positive tracking. */
+  .text-eyebrow {
+    @apply text-subheadline font-semibold uppercase;
+    color: var(--ink-muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* Never a fat browser default focus ring; never none either. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--brand) 24%, transparent);
+  }
+
+  /* Recharts injects its own focus outline on the surface element. */
+  .recharts-wrapper:focus,
+  .recharts-surface:focus {
+    outline: none;
+  }
+}
+
+@layer components {
+  /* ── The card ───────────────────────────────────────────────────────────────
+     One surface, one radius, one padding, one hover. Every block on every page
+     is this.
+
+     No border and no shadow: the card is a *lighter plane* than the ground it
+     sits on, which is the whole trick of the reference interface and the reason
+     it stays calm with forty cards on screen. Border + shadow + fill all at once
+     is the generic card look, and three separators doing one job is how a page
+     starts to look assembled by nobody in particular.
+
+     `.card-hover` is the only hover state a card gets: the plane lightens one
+     step and rises a single pixel. That is ambient acknowledgement, not an
+     affordance — it goes on a panel whose *contents* are clickable, never on a
+     panel that is itself a click target, because a card-sized lift that does not
+     lead anywhere is a lie about affordance.
+
+     There used to be a second, larger `.card-interactive` here (a 2px lift plus a
+     1.006 scale and a shadow) reserved for a card you could click. Nothing in the
+     app ever clicked as a whole card — the click targets are rows, pills, and
+     buttons, which carry `.pressable` or a fill instead — so it was dead CSS and
+     is gone. If a genuinely clickable card ever appears, this is where its rule
+     belongs, and the scale is what will separate it from the ambient state. */
+  .card {
+    background-color: var(--card);
+    border-radius: var(--radius-2xl);
+    color: var(--card-foreground);
+  }
+
+  .card-pad {
+    padding: var(--spacing-card);
+  }
+
+  .card-hover {
+    transition:
+      background-color 200ms var(--ease-out-quint),
+      transform 200ms var(--ease-out-quint);
+    will-change: auto;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .card-hover:hover {
+      background-color: var(--card-hover);
+      transform: translateY(-1px);
+    }
+  }
+
+  /* ── The tinted notice ──────────────────────────────────────────────────────
+     A block that carries a hue because its *content* is about that hue: the
+     simulator explaining what it is about to inject, the batch summary after a
+     good upload, the batch error, the engine-unreachable banner. Set the hue
+     with `[--notice:var(--severity-critical)]` and nothing else.
+
+     One fill and one edge for all of them. There used to be five of these
+     written longhand across four files, at 6%, 6%, 7% and 8% fill with 18%,
+     18%, 24% and 28% edges: four values for one role, no two of them
+     distinguishable side by side, which is exactly the "assembled by nobody in
+     particular" texture the token layer exists to remove.
+
+     `box-shadow: inset 0 0 0 1px` is what `ring-1 ring-inset` compiles to, so
+     this is the same edge those call sites drew — and because utilities sit in a
+     later layer than components, a call site that genuinely needs a different
+     edge can still put a `ring-*` on top and win. */
+  .notice {
+    background-color: color-mix(in oklab, var(--notice) 7%, var(--card));
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--notice) 24%, transparent);
+  }
+
+  /* ── Glass ──────────────────────────────────────────────────────────────────
+     Four presentations of one material, for the surfaces that have real content
+     moving behind them.
+
+     `.material-chrome` is the edge-to-edge bar: no ring, a specular line along
+     its top bevel, and an opt-in bottom seam that appears only once content has
+     scrolled up behind it. `.material-floating` is a detached pane over the page.
+     `.material-control` is the same pane at control size. `.material-head` is a
+     sticky table header inside a scrolling card: the same tint and blur with no
+     specular line and no seam, because a table head has no bevel — it *is* the
+     top of the plane — and the hairline under it is already drawn by its own
+     cells' bottom border.
+
+     `.material-head` exists because the console had three different sticky table
+     headers. The two large tables hand-rolled their own glass —
+     `supports-[backdrop-filter:blur(1px)]:bg-[color-mix(in_oklab,var(--card)_82%,transparent)]`
+     plus `backdrop-blur-md`, spelled out identically in two files, a fourth glass
+     recipe standing beside three tokenised ones at a different tint and half the
+     blur of the bar directly above it on screen. The two compact tables inside
+     `/model` and the velocity panel used a flat `bg-card` and no blur at all. One
+     class now, so a header that sticks looks the same wherever it sticks.
+
+     All four fall back to an opaque surface where backdrop-filter is missing —
+     translucency is the enhancement, legibility is not negotiable. */
+  .material-chrome,
+  .material-floating,
+  .material-control,
+  .material-head {
+    background-color: var(--card);
+  }
+
+  .material-chrome {
+    box-shadow: inset 0 1px 0 0 var(--glass-specular);
+    transition: box-shadow 280ms var(--ease-out-quint);
+  }
+
+  .material-chrome.material-seam {
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-specular),
+      inset 0 -1px 0 0 var(--glass-hairline);
+  }
+
+  .material-floating {
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-specular),
+      0 0 0 1px var(--glass-hairline),
+      var(--glass-shadow);
+  }
+
+  .material-control {
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-specular),
+      inset 0 0 0 1px var(--glass-hairline),
+      var(--shadow-tile);
+  }
+
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .material-chrome,
+    .material-floating,
+    .material-control,
+    .material-head {
+      -webkit-backdrop-filter: blur(var(--glass-blur))
+        saturate(var(--glass-saturate));
+      backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    }
+
+    .material-chrome,
+    .material-control,
+    .material-head {
+      background-color: var(--glass-tint);
+    }
+
+    .material-floating {
+      background-color: var(--glass-tint-strong);
+    }
+  }
+
+  /* Apple's corners are continuous curvature, not circular arcs — the reason an
+     iOS card looks softer than a `border-radius` box at the same radius. Where
+     the browser can express it, take it; everywhere else the plain radius stands
+     and nothing is lost. */
+  @supports (corner-shape: squircle) {
+    .card,
+    .surface-tile,
+    .surface-raised,
+    .surface-flat,
+    .material-floating,
+    .list-inset,
+    .material-control {
+      corner-shape: squircle;
+    }
+  }
+
+  /* Kept for the three surfaces that genuinely float rather than sit: a menu, a
+     tooltip, the detail drawer. Structural blocks use `.card`. */
+  .surface-tile {
+    @apply rounded-2xl bg-card;
+    box-shadow: var(--shadow-tile);
+  }
+
+  .surface-raised {
+    @apply rounded-2xl bg-card;
+    box-shadow: var(--shadow-raised);
+  }
+
+  .surface-flat {
+    @apply rounded-2xl bg-card;
+  }
+
+  /* Column and section dividers, at the one weight the whole console uses.
+     A second border weight anywhere reads as a mistake. */
+  .hairline-t {
+    border-top: 1px solid var(--border);
+  }
+
+  .hairline-b {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hairline-s {
+    border-inline-start: 1px solid var(--border);
+  }
+
+  /* iOS grouped inset list: one rounded container, and separators that start at
+     the content rather than the container edge, so a rule never collides with
+     the corner radius. */
+  .list-inset {
+    @apply overflow-hidden rounded-2xl;
+  }
+
+  .list-inset > * {
+    position: relative;
+  }
+
+  .list-inset > * + *::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    inset-inline: var(--list-inset, 0.875rem) 0;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* A press state on every interactive surface. Gated to fine pointers so touch
+     does not get a stuck hover, and skipped under reduced motion. */
+  .pressable {
+    transition:
+      transform 140ms var(--ease-out-quint),
+      background-color 160ms var(--ease-out-quint),
+      box-shadow 160ms var(--ease-out-quint),
+      color 160ms var(--ease-out-quint);
+  }
+
+  .pressable:active {
+    transform: scale(0.97);
+  }
+
+  /* Numeric columns and axis ticks align vertically; hero figures do not. */
+  .figures-tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* Refetch state: hold the previous render at reduced opacity.
+     Never a skeleton flash on a 4s poll. */
+  .is-restating {
+    opacity: 0.55;
+    transition: opacity 220ms var(--ease-out-quint);
+  }
+
+  /* ── Motion primitives ──────────────────────────────────────────────────────
+     Four animations, all of them opacity-and-transform only, all of them under
+     360ms, none of them looping except the two that report a live state. */
+
+  /* Slow, non-flashing liveness cue for the connected badge. */
+  .pulse-live {
+    animation: pulse-live 2.4s var(--ease-in-out-quint) infinite;
+  }
+
+  @keyframes pulse-live {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.45;
+      transform: scale(0.86);
+    }
+  }
+
+  /* The one thing on the page allowed to breathe: a CRITICAL row or badge.
+     A ring drawn on a pseudo-element and faded in and out, so the only animated
+     property is `opacity` and the mark itself never moves — a row of text that
+     pulses in size is unreadable, and unreadable is the opposite of the point. */
+  .glow-critical {
+    position: relative;
+  }
+
+  .glow-critical::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    box-shadow: 0 0 0 1.5px color-mix(in oklab, var(--severity-critical) 42%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    animation: breathe 2.6s var(--ease-in-out-quint) infinite;
+  }
+
+  @keyframes breathe {
+    0%,
+    100% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* A row landing in the live feed. Runs once, on mount: React keys rows by
+     transaction id, so an existing row never remounts and never re-animates,
+     and a four-second poll cannot turn the table into a slot machine.
+     Stagger comes from `--enter-index`, capped by the caller.
+
+     `backwards`, never `both`. Both fill modes hold the `from` state through the
+     delay, which is the part that matters — without it every row would flash at
+     full opacity before its turn. But `both` also retains the `to` state
+     forever, and `transform: translateY(0)` is not a no-op: it makes the element
+     a containing block for its descendants for the rest of the page's life,
+     which is enough to break `position: sticky` on a table header nested inside
+     it. `backwards` reverts to the untransformed computed style the moment the
+     animation ends, and since the last keyframe already equals that style there
+     is nothing to see at the handover. */
+  .enter-rise {
+    animation: enter-rise 300ms var(--ease-out-quint) backwards;
+    animation-delay: calc(var(--enter-index, 0) * 32ms);
+  }
+
+  @keyframes enter-rise {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Every direct child rises in sequence. Used on a page's section stack so
+     arriving at a route cascades its blocks instead of painting them all at once,
+     without any component needing to know its own index.
+
+     Capped at eight steps and 30ms apart: past that the last block arrives late
+     enough to read as slow loading rather than as sequence, and everything from
+     the ninth child on shares the final delay.
+
+     `backwards` for the reason given on `.enter-rise` above, and here it is not
+     theoretical: the sections this class animates contain the sticky filter bar
+     and every sticky table header in the console. A retained transform on the
+     section would sit between them and their scrollport.
+
+     `[data-overlay]` children opt out. A floating bar or drawer is not part of
+     the page's arrival — it mounts in response to an action, runs its own
+     entrance, and is `position: fixed`. A CSS animation outranks inline styles in
+     the cascade, so leaving it in the sequence would silently override the
+     component's own transition for the first 300ms of its life. */
+  .stagger-children > *:not([data-overlay]) {
+    animation: enter-rise 300ms var(--ease-out-quint) backwards;
+    animation-delay: 210ms;
+  }
+
+  .stagger-children > *:nth-child(1):not([data-overlay]) {
+    animation-delay: 0ms;
+  }
+  .stagger-children > *:nth-child(2):not([data-overlay]) {
+    animation-delay: 30ms;
+  }
+  .stagger-children > *:nth-child(3):not([data-overlay]) {
+    animation-delay: 60ms;
+  }
+  .stagger-children > *:nth-child(4):not([data-overlay]) {
+    animation-delay: 90ms;
+  }
+  .stagger-children > *:nth-child(5):not([data-overlay]) {
+    animation-delay: 120ms;
+  }
+  .stagger-children > *:nth-child(6):not([data-overlay]) {
+    animation-delay: 150ms;
+  }
+  .stagger-children > *:nth-child(7):not([data-overlay]) {
+    animation-delay: 180ms;
+  }
+
+  /* Route change. Keyed on the pathname so it restarts per navigation; short and
+     small, because this fires on every click in the rail and anything longer
+     than a fifth of a second starts to feel like latency.
+
+     Opacity only. The movement belongs to `.stagger-children` one block at a
+     time; a transform on a wrapper this size would animate the sticky console
+     chrome along with the page underneath it. */
+  .route-enter {
+    animation: route-enter 220ms var(--ease-out-quint) backwards;
+  }
+
+  @keyframes route-enter {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Scrollbars, tuned to the surface instead of the OS default. */
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--axis) transparent;
+  }
+
+  .scroll-thin::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .scroll-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scroll-thin::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklab, var(--ink-muted) 45%, transparent);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 9999px;
+  }
+
+  .scroll-thin::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklab, var(--ink-muted) 70%, transparent);
+  }
+}
+
+/* Reduced motion ships with the animation, not after it. Movement and looping
+   collapse; opacity fades survive, because they carry comprehension. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .pressable:active {
+    transform: none;
+  }
+
+  .card-hover:hover {
+    transform: none;
+  }
+
+  .pulse-live,
+  .glow-critical::after {
+    animation: none;
+  }
+
+  .pulse-live {
+    opacity: 1;
+  }
+
+  /* The ring still marks the row; it simply stops breathing. */
+  .glow-critical::after {
+    opacity: 1;
+  }
+
+  .enter-rise,
+  .route-enter {
+    animation: none;
+  }
+
+  /* Has to repeat the `:not()` to match the specificity of the rule it is
+     cancelling, and cancelling it matters more than it looks: the blanket
+     `animation-duration: 0.01ms` above zeroes the run but not the *delay*, and a
+     `backwards` fill holds `opacity: 0` for the whole delay. Without this, a
+     reduced-motion visitor would watch the page sit blank for a fifth of a
+     second and then pop in — a worse experience than the animation. */
+  .stagger-children > *:not([data-overlay]) {
+    animation: none;
+  }
+}

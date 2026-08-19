@@ -1,0 +1,41 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+# lib/ (do not ignore fraud-dashboard/lib)
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Node & Next.js
+node_modules/
+.next/
+out/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
