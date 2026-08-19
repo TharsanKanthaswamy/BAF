@@ -121,7 +121,7 @@ Detectra is continuously validated against quantitative unsupervised benchmarks:
 ## 🚀 Live Demo Links
 
 * **Frontend Dashboard (Next.js):** [https://baf-detectra.vercel.app/](https://baf-detectra.vercel.app/)
-* **Backend API Documentation (Swagger):** [https://npnfraud-tk.onrender.com/docs](https://npnfraud-tk.onrender.com/docs)
+* **Backend API Documentation (Swagger):** [https://npnfraud-tk.onrender.com/docs](https://npnfraud-tk.onrender.com)
 
 ---
 
