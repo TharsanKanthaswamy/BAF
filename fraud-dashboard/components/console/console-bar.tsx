@@ -166,7 +166,7 @@ export function ConsoleBar({ counts }: { counts: NavCounts }) {
           <p className="truncate text-title-3 font-semibold">
             {current?.label ?? "Console"}
           </p>
-          {current ? (
+          {current?.blurb ? (
             <p className="hidden truncate text-subheadline text-muted-foreground md:block">
               {current.blurb}
             </p>

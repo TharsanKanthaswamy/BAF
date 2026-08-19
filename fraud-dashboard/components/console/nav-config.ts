@@ -15,7 +15,7 @@ export interface NavItem {
   label: string;
   Icon: LucideIcon;
   /** One line, shown in the nav tooltip and reused as the page description. */
-  blurb: string;
+  blurb?: string;
   /**
    * Which live count to print in the nav, if any. Resolved by the shell against
    * the current buffer, because the nav config itself must stay data-free to be
@@ -44,7 +44,6 @@ export const NAV_SECTIONS: NavSection[] = [
         href: "/",
         label: "Overview",
         Icon: LayoutDashboard,
-        blurb: "Position of the book right now: volume, exposure and flag rate.",
       },
       {
         href: "/transactions",
