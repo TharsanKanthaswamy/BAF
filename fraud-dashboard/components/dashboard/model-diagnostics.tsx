@@ -53,13 +53,6 @@ const BIN_COUNT = 14;
 function trainingMetrics(metrics: EngineMetrics | null | undefined) {
   return [
     {
-      label: "Silhouette score",
-      value: metrics
-        ? formatDecimal(metrics.silhouette_score, 4)
-        : "0.5915",
-      hint: "K-means separation on the training features. Measured once, at fit time.",
-    },
-    {
       label: "Contamination",
       value: metrics
         ? formatPercent(metrics.contamination_rate_mean, 2)

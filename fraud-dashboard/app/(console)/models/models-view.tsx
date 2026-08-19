@@ -164,11 +164,6 @@ function ArtefactList({ metrics }: { metrics: EngineMetrics }) {
       value,
     })),
     {
-      label: "Silhouette score",
-      value: formatDecimal(metrics.silhouette_score, 4),
-      note: "K-means separation at fit time",
-    },
-    {
       label: "Contamination rate",
       value: formatPercent(metrics.contamination_rate_mean, 2),
       note: "outlier fraction the forest was fitted with",
