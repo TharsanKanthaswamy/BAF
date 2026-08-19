@@ -1,198 +1,232 @@
-# Real-Time Financial Fraud & Velocity Analytics Engine
+# 🛡️ Detectra: Real-Time Fraud Operations & Intelligence Console
 
-A production-grade, hybrid financial fraud detection and risk triage platform combining **deterministic business rules**, **hybrid unsupervised machine learning (Autoencoder + Isolation Forest)**, and **Groq AI-powered natural language explanations** with a modern **Next.js Real-time Analyst Dashboard**.
+[![Live Frontend](https://img.shields.io/badge/Frontend-Vercel-black?logo=vercel)](https://baf-detectra.vercel.app/)
+[![Live Backend API](https://img.shields.io/badge/API-Render-46E3B7?logo=render)](https://npnfraud-tk.onrender.com/docs)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688?logo=fastapi)](https://fastapi.tiangolo.com)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://typescriptlang.org)
+
+**Detectra** is a real-time financial fraud detection and operations platform. It combines **instant business rule checks**, **advanced unsupervised machine learning (Neural Network Autoencoder + Isolation Forest)**, and **Groq AI natural-language explanations** with an intuitive **Next.js operations console**.
 
 ---
 
-## Architecture Overview
+## 🌟 What is Detectra in Plain English?
+
+Imagine an airport security scanner for bank transactions. Every time someone makes a payment, transfers money, or logs into their account:
+
+1. **Rule Checker (Instant Gate):** Detectra immediately checks basic safety rules (e.g., *Is the customer trying to transfer more money than they actually have? Were there 5 failed password attempts in 2 minutes?*).
+2. **AI Pattern Scanner (Unsupervised ML):** Detectra compares the transaction against typical customer behavior to spot hidden, complex fraud patterns that human rules might miss.
+3. **AI Analyst Copilot (Groq LLM):** Instead of just giving a confusing score like `0.872`, Detectra's AI automatically writes a clear 1-to-2 sentence explanation in plain English (e.g., *"Unusual $14,500 transfer accompanied by 4 failed password attempts and a sudden 12-hour velocity surge"*).
+4. **Operations Console:** Bank analysts and risk officers see live incoming transactions, investigate high-risk alerts, test "what-if" transaction simulations, and upload bulk CSV batches for instant auditing.
+
+---
+
+## 🏗️ System Architecture
 
 ```mermaid
 flowchart TD
-    A[Incoming Transaction / CSV Stream] --> B[FastAPI Engine /predict]
-    
-    subgraph Preprocessing & Feature Engineering
-        B --> C[12H / 24H Rolling Velocity Engine]
-        C --> D[Column Transformer & Scaling]
+    subgraph INGESTION["1. Ingestion & Simulation"]
+        A1["Single Transaction API\n/predict"]
+        A2["Batch CSV Upload\n/upload-csv"]
+        A3["Live Stream Simulator\n/simulate"]
     end
-    
-    subgraph Multi-Layer Detection System
-        D --> E[Deterministic Business Rules]
-        D --> F[Autoencoder Reconstruction Error MSE]
-        D --> G[Isolation Forest Anomaly Scoring]
+
+    subgraph ENGINE["2. Detectra ML & Rules Engine (FastAPI)"]
+        B1["Velocity Analytics\n12h Count & 24h Spend Sum"]
+        B2["Column Transformation\nScaling & Categorical Encoding"]
+        
+        subgraph TRIPLE_LAYER["Triple-Layer Detection Stack"]
+            C1["Deterministic Business Rules\nLogin Spikes, Zero-Balance Limits"]
+            C2["Autoencoder Neural Network\nLatent Reconstruction Error MSE"]
+            C3["Isolation Forest\nTree-based Outlier Isolation"]
+        end
+        
+        D1["Risk Convergence & Scoring Matrix\nCRITICAL · HIGH · MEDIUM · LOW"]
+        D2["Groq AI Explainer Engine\nPlain-English Risk Narrative"]
     end
-    
-    subgraph Risk Triage & LLM Explanation
-        E & F & G --> H[Risk Convergence & Scoring Matrix]
-        H --> I[Groq AI Agent / Natural Language Reasoner]
+
+    subgraph STORAGE["3. State & Persistence"]
+        E1[("Process-Local Memory Buffer")]
+        E2[("Supabase PostgreSQL - Optional")]
     end
-    
-    subgraph Storage & Visualization
-        I --> J[(Supabase / In-Memory History)]
-        J --> K[Next.js Real-Time Analyst Dashboard]
+
+    subgraph CONSOLE["4. Detectra Operations Dashboard (Next.js)"]
+        F1["Live Overview & KPI Cards"]
+        F2["Alerts Queue & Worst Cases"]
+        F3["Interactive Triage Simulator"]
+        F4["Batch File Uploader & Analytics"]
+        F5["Model Performance Diagnostics"]
     end
+
+    A1 & A2 & A3 --> B1
+    B1 --> B2
+    B2 --> C1 & C2 & C3
+    C1 & C2 & C3 --> D1
+    D1 --> D2
+    D2 --> E1 & E2
+    E1 & E2 --> F1 & F2 & F3 & F4 & F5
 ```
 
 ---
 
-## Key Features
+## 🔍 How Each Component Works
 
-- **Multi-Layer Detection Stack:**
-  - **Deterministic Rules Engine:** Catches velocity spikes, high-frequency transactions within 12h/24h windows, balance mismatches, and multiple failed login attempts.
-  - **Autoencoder Neural Network:** Measures non-linear reconstruction deviation (MSE) to detect unusual multivariate patterns.
-  - **Isolation Forest:** Tree-based anomaly isolation for outlier identification across transaction attributes.
-- **Natural Language Risk Explanations (Groq AI):**
-  - Converts complex anomaly metrics into clear, human-understandable, 1–2 sentence explanations for everyday banking staff and customers.
-  - Explains real-world drivers (e.g., sudden amount surge, rapid succession purchases, multiple failed logins) without confusing ML jargon.
-- **Interactive Next.js Dashboard:**
-  - Real-time transaction live feed with automated polling.
-  - Risk categorization: `CRITICAL`, `HIGH`, `MEDIUM`, and `LOW`.
-  - Manual single-transaction audit modal with instant AI risk triage.
-  - Bulk CSV transaction dataset upload & analysis.
-  - Visual metrics: Velocity trends, anomaly distribution, and account search.
-- **Optional Supabase Cloud Integration:**
-  - Automatic persistence to cloud database with seamless in-memory fallback for local development.
+### 1. Velocity & Behavioral Feature Engineering
+* **What it does:** Tracks how fast money is moving and how frequently transactions occur for a given account over 12-hour and 24-hour windows.
+* **Why it matters:** A single $200 purchase might look normal, but 10 separate $200 purchases in 15 minutes is a classic sign of a stolen card or automated bot attack.
 
----
+### 2. Deterministic Business Rules
+* **What it does:** Evaluates hard threshold conditions immediately upon transaction arrival.
+* **Key Rules Evaluated:**
+  * **Zero/Low Balance Exhaustion:** Transaction amounts exceeding 95% of current account balance.
+  * **Brute-Force Detection:** More than 3 failed login attempts prior to a payment.
+  * **Unusual Transaction Duration:** Transactions executed abnormally fast (< 5 seconds) or stalling.
+  * **Transfer Surges:** High-value wire transfers from previously dormant channels.
 
-## Tech Stack
+### 3. Autoencoder Neural Network (Reconstruction Error)
+* **What it does:** An unsupervised deep learning model trained on legitimate banking patterns. It compresses the transaction data into a condensed latent representation and reconstructs it.
+* **How it flags fraud:** When presented with normal traffic, the reconstruction error (Mean Squared Error - MSE) is very low. When an abnormal or fraudulent transaction arrives, the network fails to reconstruct it accurately, resulting in a high MSE spike.
 
-- **Backend:** Python 3.10+, FastAPI, Uvicorn, Pandas, NumPy, Scikit-learn, Joblib
-- **LLM & AI:** Groq AI API (`groq/compound-mini`)
-- **Frontend:** Next.js 15, React 19, TypeScript, Tailwind CSS, Lucide React, Recharts
-- **Database:** Supabase PostgreSQL (optional) / In-Memory caching
+### 4. Isolation Forest (Tree-Based Anomaly Isolation)
+* **What it does:** Builds random decision trees to isolate anomalies.
+* **How it flags fraud:** Outliers and fraudulent records require very few decision splits to isolate compared to normal points that sit clustered together deep within the tree structure.
 
----
+### 5. Groq AI Natural Language Explanations
+* **What it does:** When an alert is triggered (`CRITICAL` or `HIGH`), Detectra passes the triggered rules, anomaly scores, and transaction details to Groq LLM (`llama-3.1-8b-instant`).
+* **Output:** Generates clear, actionable sentences with zero technical jargon so frontline bank staff can take immediate action (e.g., block the card, phone the customer, or approve the payment).
 
-## Project Structure
-
-```
-npnfraud/
-├── main.py                         # FastAPI backend & ML triage pipeline
-├── requirements.txt                # Python dependencies
-├── .env.example                    # Environment variables template
-├── bank_transactions_data_2.csv   # Sample transaction dataset
-├── models/                         # Pretrained ML artifacts
-│   ├── autoencoder_model.joblib    # Autoencoder neural network
-│   ├── isolation_forest_model.joblib # Isolation Forest model
-│   └── preprocessor.joblib         # Data scaler & categorical encoder
-└── fraud-dashboard/                # Next.js frontend application
-    ├── app/                        # Next.js App Router pages
-    ├── components/                 # React UI components & Dashboard
-    ├── package.json                # Frontend dependencies
-    └── tsconfig.json               # TypeScript configuration
-```
+### 6. Mathematical Model Validation
+Detectra is continuously validated against quantitative unsupervised benchmarks:
+* **Silhouette Separability Score (`0.5915`):** Proves mathematically that normal transactions form a tight, cohesive group while fraud anomalies are separated into distinct outer clusters.
+* **Contamination Rate Stability (`0.79%`):** Calibrated to maintain a realistic operational target (~1.00%), ensuring human fraud teams do not suffer from alert fatigue.
 
 ---
 
-## Getting Started
+## 🖥️ Real-Time Console Pages (`fraud-dashboard`)
+
+| Page | Purpose & Capabilities |
+| :--- | :--- |
+| **📊 Overview** | Live pulse of the operations book: value at risk, needs-review queue, scored volume, and velocity charts. |
+| **🚨 Alerts** | Prioritized triage queue showing highest-risk cases first with one-click decision workflows. |
+| **📑 Transactions** | Filterable, searchable live ledger of all scored transactions with multi-column sorting. |
+| **👤 Accounts** | Account-level rollups aggregating historical risk exposure, total flagged events, and primary channels. |
+| **⚡ Simulator** | Interactive "what-if" testing tool to construct custom scenarios and inspect live AI risk ratings in real time. |
+| **📂 Batch Upload** | Drag-and-drop CSV batch upload for instant mass scoring with live progress metrics. |
+| **🧠 Models** | Diagnostic panel detailing silhouette scores, contamination stability, and loaded model artifacts. |
+| **⚙️ Settings** | Console configuration, polling intervals, connected backend health status, and synthetic buffer management. |
+
+---
+
+## 🚀 Live Demo Links
+
+* **Frontend Dashboard (Next.js):** [https://baf-detectra.vercel.app/](https://baf-detectra.vercel.app/)
+* **Backend API Documentation (Swagger):** [https://npnfraud-tk.onrender.com/docs](https://npnfraud-tk.onrender.com/docs)
+
+---
+
+## 🛠️ Quickstart: Running Locally
 
 ### 1. Prerequisites
-- **Python 3.10+** installed
-- **Node.js 18+** and **npm** installed
-- *(Optional)* [Groq API Key](https://console.groq.com) for AI explanations
-- *(Optional)* [Supabase Project](https://supabase.com) for cloud persistence
+* **Python 3.10+**
+* **Node.js 18+** & **npm**
+* *(Optional)* [Groq API Key](https://console.groq.com) for AI explanations
+* *(Optional)* [Clerk Account](https://clerk.com) for user authentication
 
 ---
 
-### 2. Environment Configuration
+### 2. Backend Setup (FastAPI)
 
-Create a `.env` file in the root directory:
 ```bash
+# 1. Clone the repository
+git clone https://github.com/TharsanKanthaswamy/BAF.git
+cd BAF
+
+# 2. Install Python dependencies
+pip install -r requirements.txt
+
+# 3. Create .env file (Optional: add your GROQ_API_KEY)
 cp .env.example .env
+
+# 4. Start the FastAPI server
+uvicorn main:app --reload --port 8000
 ```
+* Backend API: `http://localhost:8000`
+* Interactive API Docs: `http://localhost:8000/docs`
 
-Configure your `.env` file:
-```env
-# Optional: Groq AI for natural language explanations
-GROQ_API_KEY=your_groq_api_key_here
+---
 
-# Optional: Supabase for persistent cloud history
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your_supabase_anon_key_here
+### 3. Frontend Setup (Next.js Console)
+
+```bash
+# 1. Navigate to the dashboard directory
+cd fraud-dashboard
+
+# 2. Install dependencies
+npm install
+
+# 3. Configure environment variables (optional for local dev)
+# Default points to http://localhost:8000 if not specified
+cp .env.example .env.local
+
+# 4. Start the development server
+npm run dev
 ```
+* Open your browser at: `http://localhost:3000`
 
 ---
 
-### 3. Backend Setup (FastAPI)
+## 📡 API Reference Summary
 
-1. Open a terminal in the project root:
-   ```bash
-   # Install Python dependencies
-   pip install -r requirements.txt
-
-   # Start the FastAPI server
-   py -m uvicorn main:app --reload --port 8000
-   ```
-2. The backend will be live at:
-   - **API Server:** `http://localhost:8000`
-   - **Interactive Swagger Docs:** `http://localhost:8000/docs`
-   - **Health Check:** `http://localhost:8000/health`
+| Method | Route | Description |
+| :--- | :--- | :--- |
+| `GET` | `/health` | Live health status, loaded ML model indicators, and DB connection state. |
+| `GET` | `/metrics` | Unsupervised mathematical metrics (Silhouette score, contamination rate). |
+| `GET` | `/history` | Returns the retained transaction buffer with newest transactions first. |
+| `POST` | `/predict` | Scores a single transaction with rules, ML models, and LLM reasoning. |
+| `POST` | `/upload-csv` | Processes a bulk CSV file and returns batch risk metrics. |
+| `POST` | `/simulate` | Injects synthetic transactions into the live stream to test the alerts pipeline. |
+| `POST` | `/history/delete` | Purges selected transactions or origin sources (e.g., simulation data). |
+| `DELETE`| `/history` | Completely resets the in-memory transaction buffer. |
 
 ---
 
-### 4. Frontend Setup (Next.js Dashboard)
+## 📋 Sample Prediction Request
 
-1. Open a second terminal and navigate to `fraud-dashboard`:
-   ```bash
-   cd fraud-dashboard
-
-   # Install frontend dependencies
-   npm install
-
-   # Start the Next.js development server
-   npm run dev
-   ```
-2. Open your browser and navigate to:
-   - **Dashboard UI:** `http://localhost:3000`
-
----
-
-## API Endpoints Reference
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/health` | System status, loaded ML models, and Groq/Supabase connectivity |
-| `POST` | `/predict` | Single transaction real-time scoring, rule check, and Groq explanation |
-| `POST` | `/batch-predict` | Upload a CSV file of transactions for batch ML triage |
-| `GET` | `/history` | Retrieve recent transaction logs with risk scores and explanations |
-| `GET` | `/stream` | Real-time simulated transaction event stream for live monitoring |
-
----
-
-## Sample Single Transaction Request (`POST /predict`)
-
+**`POST /predict`**
 ```json
 {
-  "TransactionID": "TXN_9921",
-  "AccountID": "ACC_4402",
-  "TransactionAmount": 14200.00,
-  "TransactionDuration": 45.0,
-  "LoginAttempts": 3,
-  "AccountBalance": 15000.00,
+  "TransactionID": "TXN_88421",
+  "AccountID": "ACC_4091",
+  "TransactionAmount": 16500.00,
+  "AccountBalance": 12000.00,
+  "LoginAttempts": 4,
+  "TransactionDuration": 15.0,
   "TransactionType": "Transfer",
   "Channel": "Online",
   "CustomerOccupation": "Business",
-  "Txn_Count_12H": 5,
-  "Txn_Sum_24H": 28400.00
+  "Txn_Count_12H": 6,
+  "Txn_Sum_24H": 33000.00
 }
 ```
 
-### Sample Response:
+**Response (`200 OK`):**
 ```json
 {
-  "transaction_id": "TXN_9921",
-  "account_id": "ACC_4402",
-  "amount": 14200.0,
+  "transaction_id": "TXN_88421",
+  "account_id": "ACC_4091",
+  "amount": 16500.0,
   "is_fraud": true,
   "risk_level": "CRITICAL",
-  "isolation_score": 0.7321,
-  "autoencoder_mse": 1.4892,
-  "ai_explanation": "Anomaly detected: An unusually large transaction of $14,200 along with multiple rapid transfers and 3 failed login attempts within 12 hours differs significantly from normal account activity."
+  "isolation_score": 0.7482,
+  "autoencoder_mse": 1.5124,
+  "source": "manual",
+  "ai_explanation": "Critical Risk: An unusually large transfer of $16,500 exceeding the account balance ($12,000) was requested following 4 failed login attempts and a rapid surge in 12-hour velocity."
 }
 ```
 
 ---
 
-## Contributing & License
+## 📄 License & Attribution
 
-This project is built for educational and financial security research. Contributions and issues are welcome via pull requests!
+Developed for financial risk research and modern operations intelligence. Contributions, bug reports, and suggestions are welcome via issues and pull requests!
