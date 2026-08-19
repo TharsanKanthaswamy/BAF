@@ -9,7 +9,8 @@ import type {
 export type { DeleteResult };
 
 export const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") ||
+  "https://npnfraud-tk.onrender.com";
 
 export interface EngineMetrics {
   silhouette_score: number;
