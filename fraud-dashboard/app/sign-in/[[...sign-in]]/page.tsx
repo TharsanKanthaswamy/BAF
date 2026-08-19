@@ -8,7 +8,7 @@ export default function Page() {
         <div className="relative size-10 overflow-hidden rounded-xl bg-muted ring-1 ring-border shadow-sm">
           <Image
             src="/logo.jpeg"
-            alt="Sentinel Logo"
+            alt="Detectra Logo"
             width={40}
             height={40}
             className="size-full object-cover"
@@ -16,7 +16,7 @@ export default function Page() {
           />
         </div>
         <div>
-          <h1 className="text-xl font-semibold leading-none">Sentinel</h1>
+          <h1 className="text-xl font-semibold leading-none">Detectra</h1>
           <p className="mt-1 text-xs text-muted-foreground">Fraud Operations Console</p>
         </div>
       </div>

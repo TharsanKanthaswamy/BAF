@@ -32,7 +32,7 @@ export function ConsoleMark() {
         />
       </div>
       <div className="min-w-0">
-        <p className="text-title-3 leading-none font-semibold">Sentinel</p>
+        <p className="text-title-3 leading-none font-semibold">Detectra</p>
         <p className="mt-1 truncate text-subheadline leading-none text-muted-foreground">
           Fraud operations
         </p>

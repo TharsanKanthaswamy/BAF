@@ -23,12 +23,12 @@ import "./globals.css";
  */
 export const metadata: Metadata = {
   title: {
-    default: "Sentinel Fraud Operations",
-    template: "%s · Sentinel",
+    default: "Detectra Fraud Operations",
+    template: "%s · Detectra",
   },
   description:
     "Real-time transaction fraud triage: velocity analytics, autoencoder and isolation-forest scoring, and LLM-narrated risk explanations.",
-  applicationName: "Sentinel",
+  applicationName: "Detectra",
   icons: {
     icon: "/fevicon.jpeg",
     shortcut: "/fevicon.jpeg",
