@@ -230,7 +230,7 @@ export function ConsoleBar({ counts }: { counts: NavCounts }) {
           ) : null}
 
           {isSignedIn ? (
-            <UserButton afterSignOutUrl="/" />
+            <UserButton />
           ) : null}
         </div>
       </div>

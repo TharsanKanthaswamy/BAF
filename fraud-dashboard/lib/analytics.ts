@@ -28,6 +28,7 @@ export interface RiskSlice {
   count: number;
   share: number;
   value: number;
+  exposure?: number;
 }
 
 export interface VelocityBucket {
@@ -274,6 +275,7 @@ export function analyse(rows: TransactionRecord[], clock: number): Analytics {
     count: riskCounts[level].count,
     share: total > 0 ? riskCounts[level].count / total : 0,
     value: riskCounts[level].value,
+    exposure: riskCounts[level].value,
   }));
 
   // Build time velocity buckets

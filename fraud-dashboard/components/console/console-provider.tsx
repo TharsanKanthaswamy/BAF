@@ -294,7 +294,7 @@ export function ConsoleProvider({ children }: { children: React.ReactNode }) {
   const deleteBySource = React.useCallback(
     async (sources: TransactionSource[]): Promise<DeleteResult> => {
       const result = await deleteTransactions({ sources });
-      const dropped = new Set(sources);
+      const dropped = new Set<string>(sources);
       setRows((previous) =>
         previous.filter((row) => !dropped.has(row.source ?? "unknown"))
       );

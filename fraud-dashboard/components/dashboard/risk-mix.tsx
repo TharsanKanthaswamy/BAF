@@ -139,7 +139,7 @@ export function RiskMix({
                     {total > 0 ? formatPercent(slice.share, 0) : "0%"}
                   </span>
                   <span className="figures-tabular w-16 shrink-0 text-right text-callout text-muted-foreground">
-                    {formatCompactCurrency(slice.exposure)}
+                    {formatCompactCurrency(slice.exposure ?? slice.value ?? 0)}
                   </span>
                 </button>
               );

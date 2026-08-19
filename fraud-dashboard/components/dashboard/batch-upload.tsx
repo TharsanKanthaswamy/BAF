@@ -42,13 +42,14 @@ function formatBytes(bytes: number): string {
 
 /** Reads whichever count key the engine happens to return. */
 function summarise(result: UploadResult): { label: string; value: string }[] {
-  const rows = result.rows ?? result.processed;
+  const rows = result.total_processed ?? result.rows ?? result.processed;
+  const flagged = result.flagged_fraud ?? result.flagged;
   const out: { label: string; value: string }[] = [];
   if (typeof rows === "number") {
     out.push({ label: "Rows scored", value: formatInteger(rows) });
   }
-  if (typeof result.flagged === "number") {
-    out.push({ label: "Flagged", value: formatInteger(result.flagged) });
+  if (typeof flagged === "number") {
+    out.push({ label: "Flagged", value: formatInteger(flagged) });
   }
   return out;
 }
@@ -108,7 +109,7 @@ export function BatchUpload({
       const outcome = await onUpload(candidate);
       setResult(outcome);
       setPhase("done");
-      const rows = outcome.rows ?? outcome.processed;
+      const rows = outcome.total_processed ?? outcome.rows ?? outcome.processed;
       toast.success("Batch scored", {
         description:
           typeof rows === "number"

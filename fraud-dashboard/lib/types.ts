@@ -44,6 +44,7 @@ export interface TransactionRecord {
   created_at?: string;
   timestamp?: string;
   source?: TransactionSource | string;
+  TransactionDate?: string;
 }
 
 export interface PredictPayload {
@@ -62,11 +63,15 @@ export interface PredictPayload {
 }
 
 export interface UploadResult {
-  total_processed: number;
-  flagged_fraud: number;
-  critical_count: number;
-  high_count: number;
+  total_processed?: number;
+  flagged_fraud?: number;
+  critical_count?: number;
+  high_count?: number;
   data?: TransactionRecord[];
+  rows?: number;
+  processed?: number;
+  flagged?: number;
+  message?: string;
 }
 
 export interface DeleteResult {

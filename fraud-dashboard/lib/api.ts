@@ -120,9 +120,10 @@ export async function deleteBySource(sources: TransactionSource[]): Promise<Dele
   return res.json();
 }
 
-export async function getMetrics(): Promise<EngineMetrics> {
+export async function getMetrics(signal?: AbortSignal): Promise<EngineMetrics> {
   const res = await fetch(`${BACKEND_URL}/metrics`, {
     cache: "no-store",
+    signal,
   });
   if (!res.ok) {
     throw new Error(`Failed to fetch engine metrics: ${res.statusText}`);

@@ -61,7 +61,7 @@ export function SettingsView() {
   // Counted from the buffer this browser holds, so the figure is honest about
   // being an estimate of what the server will delete rather than a promise.
   const syntheticHere = rows.reduce(
-    (sum, row) => sum + (SYNTHETIC_SOURCES.includes(row.source ?? "unknown") ? 1 : 0),
+    (sum, row) => sum + ((SYNTHETIC_SOURCES as readonly (string | undefined)[]).includes(row.source) ? 1 : 0),
     0
   );
 
